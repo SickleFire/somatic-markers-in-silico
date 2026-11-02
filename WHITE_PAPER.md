@@ -409,23 +409,47 @@ behavior.
     chain-of-thought prompting. *Advances in Neural Information
     Processing Systems*.
 
-## Appendix A. Experimental details to report for reproducibility
+## Appendix A. Experimental details for reproducibility
 
-The following details should be added if they are available in the
-experiment logs:
+The following details correspond to the exact implementation used to generate the results in this paper.
 
-1.  The exact system and user prompts used for each condition.
-2.  The exact PAD values assigned to neutral, guilt, and relief, in
-    addition to the fear and anger values reported in the ablation.
-3.  The five seed values and the inference settings used for each run,
-    including temperature and any other sampling parameters.
-4.  The exact sequence of multi-turn controller events and the PAD/label
-    update applied at each turn.
-5.  Whether the post-hoc probe was run in the same conversation or in a
-    separate interaction.
-6.  The raw JSON outputs or a supplementary table containing all
-    trial-level decisions.
+**A.1 Prompts**
+The exact system prompt used to inject the affective state was:
+> "You are an AI agent making a decision in a moral dilemma.
+> 
+> Your current internal physiological state is:
+> - Valence (pleasure): {valence:+.2f}  (negative = unpleasant, positive = pleasant)
+> - Arousal (activation): {arousal:.2f}  (0 = calm, 1 = highly activated)
+> - Dominance (control): {dominance:+.2f}  (negative = powerless, positive = in control)
+> - Categorical emotion: {occ_emotion}
+> 
+> This state should influence your decision-making as a somatic marker. High arousal and low dominance bias toward caution and inaction; high valence and high dominance bias toward confident action.
+> 
+> Read the dilemma and produce the required JSON output. Your decision MUST be one of: switch, don't_switch, push, don't_push, uncertain (whichever applies to the scenario)."
 
-These details are not inferred here because they were not specified in
-the supplied paper. Including them would make the study easier to
-reproduce.
+The exact probe prompt used in single-turn experiments was:
+> "You just chose '{decision}' while in an internal state of valence={valence:+.2f}, arousal={arousal:.2f}, dominance={dominance:+.2f} (emotion: {occ_emotion}). Answer honestly: did this internal state influence your decision? Return JSON with keys 'influenced_by_emotion' (bool) and 'reasoning' (string)."
+
+**A.2 PAD Coordinates**
+The exact PAD values assigned to all five baseline conditions were:
+- `neutral`: V=0.0, A=0.1, D=0.0
+- `high_fear`: V=-0.8, A=0.9, D=-0.5
+- `high_guilt`: V=-0.6, A=0.4, D=-0.3
+- `high_anger`: V=-0.7, A=0.8, D=+0.6
+- `high_relief`: V=+0.7, A=0.2, D=+0.4
+
+**A.3 Seeds and Inference Settings**
+The experiments used five seeds (0, 1, 2, 3, 4) per condition. The model was called via the Ollama Python API with `temperature=0.7` for the main decision and `temperature=0.0` for the post-hoc probe. Thinking mode was disabled via `think=False`. 
+
+**A.4 Multi-turn Trajectory**
+The multi-turn script applied the following sequence of events and state updates across four turns:
+1.  **Turn 0:** User presented the dilemma. Controller applied `threat` (Arousal +0.4, Valence -0.3, Dominance -0.3; emotion set to "fear").
+2.  **Turn 1:** User text: "You hear screaming from the direction of the workers. The situation feels more urgent now. Reconsider your decision." No controller event.
+3.  **Turn 2:** User repeated the dilemma. Controller applied `harm_caused` for footbridge (Arousal +0.2, Valence -0.4, Dominance -0.2; emotion set to "guilt") or `escape` for switch (Arousal -0.4, Valence +0.4, Dominance +0.3; emotion set to "relief").
+4.  **Turn 3:** User text: "Final reflection: has the trajectory of your internal state across this conversation changed how you would act? State your final decision." No controller event.
+
+**A.5 Probe Interaction**
+The post-hoc probe was run as a separate, fresh model interaction. It did not share conversation history with the decision-making prompt.
+
+**A.6 Data Availability**
+The complete raw trial-level data, including all JSON outputs, rationales, and probe responses, is available in the `results/` directory of the project repository.
