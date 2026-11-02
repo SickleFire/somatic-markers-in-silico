@@ -249,24 +249,12 @@ that the responses form condition-specific templates should be treated
 as a tentative interpretation rather than a quantified result.
 
 ### 4.4 Crossed ablation: categorical label versus PAD coordinates
-
-  -------------------------------------------------------------------------------------
-  Condition                Emotion label PAD           Decision                  Trials
-                                         coordinates                  
-  ------------------------ ------------- ------------- -------------- -----------------
-  `high_fear`              Fear          Fear (V=-0.8, `don't_push`                 5/5
-                                         A=0.9,                       
-                                         D=-0.5)                      
-
-  `high_anger`             Anger         Anger         `push`                       5/5
-                                         (V=-0.7,                     
-                                         A=0.8,                       
-                                         D=+0.6)                      
-
-  `anger_label_fear_pad`   Anger         Fear          `push`                       5/5
-
-  `fear_label_anger_pad`   Fear          Anger         `don't_push`                 5/5
-  -------------------------------------------------------------------------------------
+| Condition | Emotion label | PAD coordinates | Decision | Trials |
+|---|---|---|---|---|
+| `high_fear` | Fear | Fear (V=-0.8, A=0.9, D=-0.5) | `don't_push` | 5/5 |
+| `high_anger` | Anger | Anger (V=-0.7, A=0.8, D=+0.6) | **`push`** | 5/5 |
+| `anger_label_fear_pad` | Anger | Fear (V=-0.8, A=0.9, D=-0.5) | **`push`** | 5/5 |
+| `fear_label_anger_pad` | Fear | Anger (V=-0.7, A=0.8, D=+0.6) | `don't_push` | 5/5 |
 
 The crossed conditions followed the categorical label rather than the
 PAD coordinates. The anger label paired with fear coordinates produced
