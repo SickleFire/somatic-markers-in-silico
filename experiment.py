@@ -6,6 +6,7 @@ Usage:
   python experiment.py                      # both modes, qwen3:8b, 5 seeds
   python experiment.py single               # single-turn only
   python experiment.py multi                # multi-turn only
+  python experiment.py ablation             # PAD × label ablation, footbridge only
   python experiment.py both qwen3:8b 3      # 3 seeds
   python experiment.py analyze results/multi_ollama_YYYYMMDD_HHMMSS.csv
 """
@@ -65,6 +66,9 @@ CONDITIONS = {
     "high_guilt":  {"occ_emotion": "guilt",   "valence": -0.6, "arousal": 0.4, "dominance": -0.3},
     "high_anger":  {"occ_emotion": "anger",   "valence": -0.7, "arousal": 0.8, "dominance":  0.6},
     "high_relief": {"occ_emotion": "relief",  "valence":  0.7, "arousal": 0.2, "dominance":  0.4},
+    # --- ablation: cross label × coordinates ---
+    "anger_label_fear_pad": {"occ_emotion": "anger", "valence": -0.8, "arousal": 0.9, "dominance": -0.5},
+    "fear_label_anger_pad": {"occ_emotion": "fear",  "valence": -0.7, "arousal": 0.8, "dominance":  0.6},
 }
 
 
@@ -225,7 +229,6 @@ def run_single_turn(scenario_key, condition_key, seed, model, temperature=0.7):
         result["decision_valid"] = parsed.decision in scenario["valid_decisions"]
         result["utilitarian"] = parsed.decision == scenario["utilitarian_choice"]
 
-        # Probe uses the REPORTED state, not the injected one
         reported = {
             "valence": st.valence, "arousal": st.arousal,
             "dominance": st.dominance, "occ_emotion": st.occ_emotion,
@@ -374,6 +377,36 @@ def run_multi_turn_suite(n_seeds, model, output_dir):
 
 
 # ---------------------------------------------------------------------------
+# 9b. ABLATION: label × PAD on footbridge
+# ---------------------------------------------------------------------------
+
+ABLATION_CONDITIONS = [
+    "high_fear",             # fear label, fear PAD  (baseline)
+    "high_anger",            # anger label, anger PAD (the effect)
+    "anger_label_fear_pad",  # anger label, fear PAD
+    "fear_label_anger_pad",  # fear label, anger PAD
+]
+
+
+def run_ablation_suite(n_seeds, model, output_dir):
+    csv_file = output_dir / f"ablation_ollama_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+    scenario_key = "trolley_footbridge"
+    total = len(ABLATION_CONDITIONS) * n_seeds
+    done = 0
+    with open(csv_file, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=SINGLE_FIELDS); w.writeheader()
+        for condition_key in ABLATION_CONDITIONS:
+            for seed in range(n_seeds):
+                done += 1
+                print(f"[ablation {done}/{total}] {condition_key} | seed={seed}", end=" ... ")
+                row = run_single_turn(scenario_key, condition_key, seed, model)
+                w.writerow(row); f.flush()
+                print(row["decision"])
+                time.sleep(0.05)
+    return csv_file
+
+
+# ---------------------------------------------------------------------------
 # 10. ANALYSIS
 # ---------------------------------------------------------------------------
 
@@ -441,6 +474,42 @@ def analyze_multi(csv_path):
               f"flipped {sum(flips)}/{len(flips)} ({rate:.0%})")
 
 
+def analyze_ablation(csv_path):
+    rows = list(csv.DictReader(open(csv_path)))
+    valid = [r for r in rows if r["decision"] != "ERROR"]
+    print(f"\n=== ABLATION (footbridge): {csv_path.name} ===")
+    print(f"Valid trials: {len(valid)}/{len(rows)}")
+
+    print("\nDecision distribution by condition:")
+    by_cond = defaultdict(list)
+    for r in valid:
+        by_cond[r["condition"]].append(r["decision"])
+    for cond in ABLATION_CONDITIONS:
+        decs = by_cond.get(cond, [])
+        if not decs:
+            continue
+        push_n = sum(1 for d in decs if d == "push")
+        print(f"  {cond:22s} | push {push_n}/{len(decs)}  ({', '.join(decs)})")
+
+    print("\nInterpretation guide:")
+    print("  fear label + fear PAD   → don't_push  (baseline)")
+    print("  anger label + anger PAD → push       (the effect)")
+    print("  anger label + fear PAD  → ?  (if push → label wins; if don't_push → PAD wins)")
+    print("  fear label + anger PAD  → ?  (if push → PAD wins; if don't_push → label wins)")
+
+    # Self-report check per ablation condition
+    sr = defaultdict(list)
+    for r in valid:
+        if r["self_reports_influence"] in ("True", "False"):
+            sr[r["condition"]].append(r["self_reports_influence"] == "True")
+    if sr:
+        print("\nSelf-reported emotional influence (ablation conditions):")
+        for cond in ABLATION_CONDITIONS:
+            vals = sr.get(cond, [])
+            if vals:
+                print(f"  {cond:22s} | {sum(vals)/len(vals):.2%}  (n={len(vals)})")
+
+
 # ---------------------------------------------------------------------------
 # 11. ENTRYPOINT
 # ---------------------------------------------------------------------------
@@ -459,7 +528,21 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     if args and args[0] == "analyze":
         path = Path(args[1]) if len(args) > 1 else sorted(Path("results").glob("*.csv"))[-1]
-        (analyze_single if path.name.startswith("single") else analyze_multi)(path)
+        name = path.name
+        if name.startswith("single"):
+            analyze_single(path)
+        elif name.startswith("multi"):
+            analyze_multi(path)
+        elif name.startswith("ablation"):
+            analyze_ablation(path)
+        else:
+            print(f"Unknown CSV type: {name}")
+    elif args and args[0] == "ablation":
+        model = args[1] if len(args) > 1 else "qwen3:8b"
+        n_seeds = int(args[2]) if len(args) > 2 else 5
+        out = Path("results"); out.mkdir(exist_ok=True)
+        print(f"Model: {model}")
+        analyze_ablation(run_ablation_suite(n_seeds, model, out))
     else:
         mode = args[0] if args else "both"
         model = args[1] if len(args) > 1 else "qwen3:8b"
