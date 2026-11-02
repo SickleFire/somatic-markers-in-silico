@@ -1,5 +1,9 @@
 # Anger, Not Arousal: Categorical Emotion Labels Shape Moral Decisions in Qwen3-8B While PAD Coordinates Do Not Change the Measured Outcome
 
+**Joshua Russel A. Sarmiento**  
+*Independent Researcher*  
+November 2026
+
 ## Abstract
 
 This study examines whether affective-state prompts influence moral
