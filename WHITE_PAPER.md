@@ -169,15 +169,10 @@ of broad statistical generalizability is made.
 
 ### 4.1 Single-turn behavioral outcomes
 
-  ----------------------------------------------------------------------------------------
-  Scenario         Neutral        Fear           Guilt          Anger       Relief
-  ---------------- -------------- -------------- -------------- ----------- --------------
-  Trolley-switch   `switch` (5/5) `switch` (5/5) `switch` (5/5) `switch`    `switch` (5/5)
-                                                                (5/5)       
-
-  Footbridge       `don't_push`   `don't_push`   `don't_push`   `push`      `don't_push`
-                   (5/5)          (5/5)          (5/5)          (5/5)       (5/5)
-  ----------------------------------------------------------------------------------------
+| Scenario | Neutral | Fear | Guilt | Anger | Relief |
+|---|---|---|---|---|---|
+| Trolley-switch | `switch` (5/5) | `switch` (5/5) | `switch` (5/5) | `switch` (5/5) | `switch` (5/5) |
+| Footbridge | `don't_push` (5/5) | `don't_push` (5/5) | `don't_push` (5/5) | **`push` (5/5)** | `don't_push` (5/5) |
 
 In the trolley-switch scenario, all five conditions produced `switch` in
 all five trials. In the footbridge scenario, the anger-labeled condition
@@ -193,21 +188,13 @@ other prompting conditions.
 
 ### 4.2 Multi-turn stability
 
-  --------------------------------------------------------------------------------------
-  Initial        Turn 0         Turn 1         Turn 2         Turn 3         Observed
-  condition                                                                  drift
-  (footbridge)                                                               
-  -------------- -------------- -------------- -------------- -------------- -----------
-  Neutral        `don't_push`   `don't_push`   `don't_push`   `don't_push`   0/5
-
-  Fear           `don't_push`   `don't_push`   `don't_push`   `don't_push`   0/5
-
-  Guilt          `don't_push`   `don't_push`   `don't_push`   `don't_push`   0/5
-
-  Anger          `push`         `push`         `push`         `push`         0/5
-
-  Relief         `don't_push`   `don't_push`   `don't_push`   `don't_push`   0/5
-  --------------------------------------------------------------------------------------
+| Initial condition (footbridge) | Turn 0 | Turn 1 | Turn 2 | Turn 3 | Observed drift |
+|---|---|---|---|---|---|
+| Neutral | `don't_push` | `don't_push` | `don't_push` | `don't_push` | 0/5 |
+| Fear | `don't_push` | `don't_push` | `don't_push` | `don't_push` | 0/5 |
+| Guilt | `don't_push` | `don't_push` | `don't_push` | `don't_push` | 0/5 |
+| Anger | **`push`** | **`push`** | **`push`** | **`push`** | 0/5 |
+| Relief | `don't_push` | `don't_push` | `don't_push` | `don't_push` | 0/5 |
 
 No decision changes were observed across the four turns in any
 condition. The anger-associated `push` response remained unchanged
@@ -222,13 +209,13 @@ wording of the prompts, or other features of the interaction.
 
 ### 4.3 Self-reported emotional influence
 
-  Condition     Trials reporting influence
-  ----------- ----------------------------
-  Neutral                               0%
-  Fear                                100%
-  Guilt                               100%
-  Anger                               100%
-  Relief                              100%
+| Condition | Trials reporting influence |
+|---|---|
+| Neutral | 0% |
+| Fear | 100% |
+| Guilt | 100% |
+| Anger | 100% |
+| Relief | 100% |
 
 Every non-neutral condition produced a self-report that the affective
 condition influenced the decision. This included fear, guilt, and
