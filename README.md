@@ -39,4 +39,4 @@ python analysis/state_fidelity.py results/single_ollama_*.csv --md
 If you use this code, data, or findings in your own work, please cite:
 
 (Joshua Russel A. Sarmiento). (2026). Anger, Not Arousal: Categorical Emotion Labels Shape Moral Decisions in Qwen3-8B While PAD Coordinates Do Not Change the Measured Outcome. 
-GitHub repository. https://github.com/SickleFire/somatic-markers-in-silico
+<br>GitHub repository. https://github.com/SickleFire/somatic-markers-in-silico
