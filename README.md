@@ -33,6 +33,7 @@ python experiment.py ablation qwen3:8b-q4_K_M 5
 
 # 5. Generate the state-fidelity markdown table
 python analysis/state_fidelity.py results/single_ollama_*.csv --md
+```
 
 ## Citation
 If you use this code, data, or findings in your own work, please cite:
